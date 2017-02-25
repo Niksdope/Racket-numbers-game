@@ -1,7 +1,2 @@
 # Executable files
-*.exe
-*.jpg
-*.png
-
-# Build folders
-bin/
+*.bak
