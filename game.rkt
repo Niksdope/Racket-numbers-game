@@ -10,44 +10,39 @@ targetNumber
 (define randomNumbers null)
 
 ; The list of all operators
-(define operators (list + - * /))
+(define ops (list '+ '- '* '/))
+(define allOps (cartesian-product ops ops))
 
 ; A racket function that takes a list of values as a parameter and selects 6 random values from it, putting them in the randomNumbers list
-(define (getRandomNumbers l)
+(define (getRandomNumbers l size)
   (define n (list-ref l (random (length l))))
   (set! randomNumbers (cons n randomNumbers))
   (set! l (remove n l))
-  (if (= (length randomNumbers) 6)
+  (if (= (length randomNumbers) size)
       randomNumbers
-      (getRandomNumbers l)))
+      (getRandomNumbers l size)))
 
-(getRandomNumbers possibleNumbers)
+(getRandomNumbers possibleNumbers 3)
+(define allNums (permutations randomNumbers))
 
-; http://stackoverflow.com/questions/13978595/getting-all-possible-combinations-of-x-booleans-racket-scheme
-(define (permutationsWithRepeats size elements)
-  (if (zero? size)
-      '(())
-      (append-map (lambda (p)
-                    (map (lambda (e)
-                           (cons e p))
-                         elements))
-                  (permutationsWithRepeats (sub1 size) elements))))
+; Combine the numbers and operators of 2 lists
+(define (combineNumsOps nums ops)
+  (if (null? nums)
+      '()
+      (if (> (length nums) (length ops))
+      (cons (car nums) (combineNumsOps (cdr nums) ops))
+      (cons (car ops) (combineNumsOps nums (cdr ops))))))
 
-(define numberPerms (combinations (permutations randomNumbers)))
-numberPerms
+; Combine all op variations to one nums list
+(define (combineNumsAllOps nums ops)
+  (if (null? ops)
+      '()
+      (cons (combineNumsOps nums (car ops)) (combineNumsAllOps nums (cdr ops)))))
 
-;(define operatorPerms (permutationsWithRepeats 5 operators))
+; Generate a list of all possibilities
+(define (generatePossibilities nums ops)
+  (if (null? nums)
+      '()
+      (cons (combineNumsAllOps (car nums) ops) (generatePossibilities (cdr nums) ops))))
 
-(define combs null)
-
-;(define (combine nums ops)
-;  (if (null? ops)
-;      '(())
-;      (if (number? (car combs))
-;          (cons (car (car ops)) (combine nums (cdr (car ops))))
-;          (
-;  (if (null? nums)
-;      '(())
-;      (if (number? (car combs))
-;          (cons (car numbers) (combine (cdr numbers) operators))
-;          (cons 
+(generatePossibilities allNums allOps)
