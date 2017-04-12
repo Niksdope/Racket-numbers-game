@@ -45,4 +45,10 @@ targetNumber
       '()
       (cons (combineNumsAllOps (car nums) ops) (generatePossibilities (cdr nums) ops))))
 
-(generatePossibilities allNums allOps)
+; Take a normal maths function and evaluate it
+(define (evaluate list)
+  (if (= (length list) 1)
+      (car list)
+      ((car (cdr list)) (car list) (evaluate (cdr (cdr list))))))
+
+;(generatePossibilities allNums allOps)
