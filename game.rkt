@@ -10,8 +10,8 @@ targetNumber
 (define randomNumbers null)
 
 ; The list of all operators
-(define ops (list '+ '- '* '/))
-(define allOps (cartesian-product ops ops))
+(define ops (list + - * /))
+(define allOps (cartesian-product ops ops ops))
 
 ; A racket function that takes a list of values as a parameter and selects 6 random values from it, putting them in the randomNumbers list
 (define (getRandomNumbers l size)
@@ -22,7 +22,7 @@ targetNumber
       randomNumbers
       (getRandomNumbers l size)))
 
-(getRandomNumbers possibleNumbers 3)
+(getRandomNumbers possibleNumbers 4)
 (define allNums (permutations randomNumbers))
 
 ; Combine the numbers and operators of 2 lists
@@ -45,10 +45,25 @@ targetNumber
       '()
       (cons (combineNumsAllOps (car nums) ops) (generatePossibilities (cdr nums) ops))))
 
-; Take a normal maths function and evaluate it
+; Take a normal maths expression and evaluate it (NEED TO REMOVE DIVISION BY ZERO AND NEGATIVE NUMBERS HERE)
 (define (evaluate list)
   (if (= (length list) 1)
       (car list)
       ((car (cdr list)) (car list) (evaluate (cdr (cdr list))))))
 
-;(generatePossibilities allNums allOps)
+; Mini-function to take off the head of the head of the list
+(define (cdadr list)
+  (cons (cdar list) (cdr list)))
+
+; Evaluate every answer and return successful ones
+(define (evalAll list)
+  (if (null? list)
+      '()
+      (if (= (length (car list)) 0)
+          (evalAll (cdr list))
+          (if (= (evaluate (caar list)) targetNumber)   
+              (cons (caar list) (evalAll (cdadr list)))
+              (evalAll (cdadr list))))))
+
+(evalAll (generatePossibilities allNums allOps))
+(evaluate (list 100 + 8 / 9 - 5))
