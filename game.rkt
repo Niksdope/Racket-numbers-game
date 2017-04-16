@@ -11,7 +11,7 @@ targetNumber
 
 ; The list of all operators
 (define ops (list + - * /))
-(define allOps (cartesian-product ops ops ops))
+(define allOps (cartesian-product ops ops ops ops ops))
 
 ; A racket function that takes a list of values as a parameter and selects 6 random values from it, putting them in the randomNumbers list
 (define (getRandomNumbers l size)
@@ -22,7 +22,7 @@ targetNumber
       randomNumbers
       (getRandomNumbers l size)))
 
-(getRandomNumbers possibleNumbers 4)
+(getRandomNumbers possibleNumbers 6)
 (define allNums (permutations randomNumbers))
 
 ; Combine the numbers and operators of 2 lists
@@ -45,25 +45,42 @@ targetNumber
       '()
       (cons (combineNumsAllOps (car nums) ops) (generatePossibilities (cdr nums) ops))))
 
-; Take a normal maths expression and evaluate it (NEED TO REMOVE DIVISION BY ZERO AND NEGATIVE NUMBERS HERE)
+; Procedure to check if in the equation at any point fractions or negative numbers happen
+(define (validExpr list)
+  (if (< (length list) 2)
+      #t
+      (cond
+        [(eq? (car (cdr list)) /)
+             (if (= (modulo (car list) (car (cdr (cdr list)))) 0)
+                 (validExpr (cdr (cdr list)))
+                 #f)]
+        [(eq? (car (cdr list)) -)
+             (if (< (- (car list) (car (cdr (cdr list)))) 0)
+                 #f
+                 (validExpr (cdr (cdr list))))]
+        [else (validExpr (cdr (cdr list)))])))
+                 
+; Take a normal maths expression and evaluate it
 (define (evaluate list)
   (if (= (length list) 1)
       (car list)
       ((car (cdr list)) (car list) (evaluate (cdr (cdr list))))))
 
-; Mini-function to take off the head of the head of the list
+; Mini-function to take off the head of the head of the list (racket version of this procedure is not what I need)
 (define (cdadr list)
   (cons (cdar list) (cdr list)))
 
-; Evaluate every answer and return successful ones
+; Evaluate every answer and return successful ones (ones that equal the targetNumber)
 (define (evalAll list)
   (if (null? list)
       '()
-      (if (= (length (car list)) 0)
+      (if (null? (car list))
           (evalAll (cdr list))
-          (if (= (evaluate (caar list)) targetNumber)   
-              (cons (caar list) (evalAll (cdadr list)))
-              (evalAll (cdadr list))))))
+          (if (not (validExpr (caar list)))
+              (evalAll (cdadr  list))
+              (if (= (evaluate (caar list)) targetNumber)   
+                  (cons (caar list) (evalAll (cdadr list)))
+                  (evalAll (cdadr list)))))))
 
-(evalAll (generatePossibilities allNums allOps))
-(evaluate (list 100 + 8 / 9 - 5))
+(evalAll (remove-duplicates (generatePossibilities allNums allOps)))
+;(evaluate (list 50 * 4 + 7 * 1))
