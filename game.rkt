@@ -3,7 +3,7 @@
 (define possibleNumbers (list 1 1 2 2 3 3 4 4 5 5 6 6 7 7 8 8 9 9 10 10 25 50 75 100))
 
 ; targetNumber is going to be chosen here. This will be the goal number of our calculations
-(define targetNumber (random 101 1000))
+(define targetNumber (random 101 999))
 targetNumber
 
 ; The list that we will be populated with 6 random values
