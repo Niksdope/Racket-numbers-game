@@ -29,9 +29,11 @@ targetNumber
 (define (combineNumsOps nums ops)
   (if (null? nums)
       '()
-      (if (> (length nums) (length ops))
-      (cons (car nums) (combineNumsOps (cdr nums) ops))
-      (cons (car ops) (combineNumsOps nums (cdr ops))))))
+      (if (not (list? ops)) ; Check if the ops is a list of operators or a single procedure (e.g. +)
+          (flatten (cons (cons (car nums) ops) (car (cdr nums)))) 
+          (if (> (length nums) (length ops))
+              (cons (car nums) (combineNumsOps (cdr nums) ops))
+              (cons (car ops) (combineNumsOps nums (cdr ops)))))))
 
 ; Combine all op variations to one nums list
 (define (combineNumsAllOps nums ops)
@@ -62,9 +64,14 @@ targetNumber
                  
 ; Take a normal maths expression and evaluate it
 (define (evaluate list)
+  (with-handlers ([exn:fail:contract:divide-by-zero?
+                   (lambda (e) (cond
+                                 [(or (eq? (car (cdr list)) +) (eq? (car (cdr list)) -))
+                                  0]
+                                 [else 1]))]) ; Put in error handling if at some time in the recursion the script is trying to divide by zero
   (if (= (length list) 1)
       (car list)
-      ((car (cdr list)) (car list) (evaluate (cdr (cdr list))))))
+      ((car (cdr list)) (car list) (evaluate (cdr (cdr list)))))))
 
 ; Mini-function to take off the head of the head of the list (racket version of this procedure is not what I need)
 (define (cdadr list)
@@ -82,5 +89,21 @@ targetNumber
                   (cons (caar list) (evalAll (cdadr list)))
                   (evalAll (cdadr list)))))))
 
-(evalAll (remove-duplicates (generatePossibilities allNums allOps)))
+;(evalAll (remove-duplicates (generatePossibilities allNums allOps)))
 ;(evaluate (list 50 * 4 + 7 * 1))
+
+; Method to get a smaller size of permutations from a big perms list (Basically just shaves the tail of the list)
+(define (perms size list)
+  (if (null? list)
+      '()
+      (cons (take (car list) size) (perms size (cdr list)))))
+
+; Defined a method here to check number lists of size 6, 5, 4, 3 and 2
+(define (checkAll)
+  (evalAll (generatePossibilities allNums allOps))
+  (evalAll (generatePossibilities (perms 5 allNums) (perms 4 allOps)))
+  (evalAll (generatePossibilities (perms 4 allNums) (perms 3 allOps)))
+  (evalAll (generatePossibilities (perms 3 allNums) (perms 2 allOps)))
+  (evalAll (generatePossibilities (perms 2 allNums) ops)))
+
+(remove-duplicates (checkAll))
