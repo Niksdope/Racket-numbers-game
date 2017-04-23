@@ -89,9 +89,6 @@ targetNumber
                   (cons (caar list) (evalAll (cdadr list)))
                   (evalAll (cdadr list)))))))
 
-;(evalAll (remove-duplicates (generatePossibilities allNums allOps)))
-;(evaluate (list 50 * 4 + 7 * 1))
-
 ; Method to get a smaller size of permutations from a big perms list (Basically just shaves the tail of the list)
 (define (perms size list)
   (if (null? list)
